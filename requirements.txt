@@ -2,6 +2,7 @@ matplotlib
 numpy
 pandas
 torch
+torchvision
 scikit-learn
 tensorboard
 tqdm
