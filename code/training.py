@@ -1,29 +1,14 @@
-###TODO
-"""
-Load dataset
-Split train/test subsets
-Create model
-Optim, loss (acc)
-train
-eval
-confusion matrix/classification report
-save the model
-"""
-
 import torch
 from torch import nn
 import torchvision
-from torchvision.datasets import FashionMNIST
-from torch.utils.data import random_split
-import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, random_split
 from tqdm.auto import tqdm
 from sklearn.metrics import confusion_matrix, classification_report
 import numpy as np
 from pathlib import Path
-import matplotlib.pyplot as plt
 from torch.utils.tensorboard import SummaryWriter
-from correct_dataset import ExerciseDataset
+from dataset import powerlifting_dataset
+from model_class import PowerliftingCNN, accuracy_fn
 
 writer = SummaryWriter()
 
@@ -40,18 +25,11 @@ input_size = 224*224
 num_classes = 3
 batch_size = 32
 
-
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-])
-
-dataset = ExerciseDataset("powerlifting/train/images", transform=transform)
+dataset = powerlifting_dataset
 
 train_size = int(0.8 * len(dataset))
 test_size = len(dataset) - train_size
 train_data, test_data = random_split(dataset, [train_size, test_size])
-
 
 train_loader = DataLoader(train_data, batch_size, shuffle=True)
 test_loader = DataLoader(test_data, batch_size, shuffle=False)
@@ -61,41 +39,8 @@ print(f'train_loader: {train_loader} \ntest_loader: {test_loader}')
 print('\n')
 print('Dataset loaded successfully !')
 
-
 #MODEL
 print('Creation of the model...')
-
-class PowerliftingCNN(nn.Module):
-    def __init__(self, num_classes):
-        super().__init__()
-        self.cnn_layers = nn.Sequential(
-            nn.Conv2d(3, 32, 3, stride=2),  # downsample
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(32, 64, 3, stride=2),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(64, 64, 3, stride=2),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(64, 128, 3, stride=2),
-            nn.ReLU(),
-        )
-        # compute output shape dynamically
-        with torch.no_grad():
-            dummy = torch.zeros(1, 3, 224, 224)
-            n_features = self.cnn_layers(dummy).numel()
-        
-        self.linear_layers = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(n_features, num_classes)
-        )
-
-    def forward(self, x):
-        out = self.cnn_layers(x)
-        out = self.linear_layers(out)
-        return out
-
 
 Powerlifting_CNN = PowerliftingCNN(num_classes).to(device)
 
@@ -108,11 +53,6 @@ print('\n')
 loss_fn = nn.CrossEntropyLoss()
 
 optimizer = torch.optim.Adam(params=Powerlifting_CNN.parameters(), lr=0.001)
-
-def accuracy_fn(outputs, labels):
-    preds = torch.argmax(outputs, dim=1)
-    acc = (torch.sum(preds == labels).item()/len(preds))*100
-    return acc
 
 epochs = 31
 
@@ -197,14 +137,13 @@ print("\nConfusion Matrix:\n", confusion_matrix(all_labels, all_preds))
 print("\nClassification Report:\n", classification_report(all_labels, all_preds))
 
 
+# #Saving the model
+# MODEL_PATH = Path("Models")
+# MODEL_PATH.mkdir(parents=True, exist_ok=True)
 
-#Saving the model
-MODEL_PATH = Path("Models")
-MODEL_PATH.mkdir(parents=True, exist_ok=True)
+# MODEL_NAME = "Powerlifting_CNN_Classification.pth"
+# MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
 
-MODEL_NAME = "Powerlifting_CNN_Classification.pth"
-MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
-
-#save the model state dictionary
-print(f'Saving model to {MODEL_SAVE_PATH}')
-torch.save(obj=Powerlifting_CNN.state_dict(), f=MODEL_SAVE_PATH)
+# #save the model state dictionary
+# print(f'Saving model to {MODEL_SAVE_PATH}')
+# torch.save(obj=Powerlifting_CNN.state_dict(), f=MODEL_SAVE_PATH)

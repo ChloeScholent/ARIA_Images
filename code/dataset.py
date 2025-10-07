@@ -37,15 +37,8 @@ class ExerciseDataset(Dataset):
         return image, label
 
 transform = transforms.Compose([
-    transforms.Resize((640, 640)),
+    transforms.Resize((224, 224)),
     transforms.ToTensor(),
 ])
 
-dataset = ExerciseDataset("powerlifting/train/images", transform=transform)
-dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-
-# Example
-for imgs, labels in dataloader:
-    print(imgs.shape)   # e.g. torch.Size([32, 3, 224, 224])
-    print(labels)       # e.g. tensor([0, 2, 1, ...])
-    break
+powerlifting_dataset = ExerciseDataset("dataset/", transform=transform)

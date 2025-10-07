@@ -11,11 +11,10 @@ __pycache__/
 code/__pycache__/
 *.pyc
 runs/
-powerlifting/
 
 # Ignorer les fichiers de configuration
 env/
-data/
+dataset/
 config/*.json
 
 # Ignorer les fichiers système
