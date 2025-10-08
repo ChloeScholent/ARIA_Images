@@ -41,4 +41,8 @@ transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 
+<<<<<<< HEAD:code/dataset.py
 powerlifting_dataset = ExerciseDataset("dataset/", transform=transform)
+=======
+powerlifting_dataset = ExerciseDataset("powerlifting/train/images", transform=transform)
+>>>>>>> 899693a (update):code/correct_dataset.py

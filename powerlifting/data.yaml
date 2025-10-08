@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 3
+names: ['bench', 'deadlift', 'squat']
+
+roboflow:
+  workspace: proje-8ob9y
+  project: powerlifting
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/proje-8ob9y/powerlifting/dataset/1

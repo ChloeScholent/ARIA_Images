@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 899693a (update)
 import torch
 from torch import nn
 import torchvision
@@ -7,8 +11,13 @@ from sklearn.metrics import confusion_matrix, classification_report
 import numpy as np
 from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
+<<<<<<< HEAD
 from dataset import powerlifting_dataset
 from model_class import PowerliftingCNN, accuracy_fn
+=======
+from correct_dataset import powerlifting_dataset
+from model_class import PowerliftingCNN
+>>>>>>> 899693a (update)
 
 writer = SummaryWriter()
 
@@ -141,9 +150,19 @@ print("\nClassification Report:\n", classification_report(all_labels, all_preds)
 # MODEL_PATH = Path("Models")
 # MODEL_PATH.mkdir(parents=True, exist_ok=True)
 
+<<<<<<< HEAD
 # MODEL_NAME = "Powerlifting_CNN_Classification.pth"
 # MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
 
+=======
+# #Saving the model
+# MODEL_PATH = Path("Models")
+# MODEL_PATH.mkdir(parents=True, exist_ok=True)
+
+# MODEL_NAME = "Powerlifting_CNN_Classification.pth"
+# MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
+
+>>>>>>> 899693a (update)
 # #save the model state dictionary
 # print(f'Saving model to {MODEL_SAVE_PATH}')
 # torch.save(obj=Powerlifting_CNN.state_dict(), f=MODEL_SAVE_PATH)
