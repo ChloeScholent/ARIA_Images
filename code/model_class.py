@@ -32,3 +32,12 @@ class PowerliftingCNN(nn.Module):
         out = self.cnn_layers(x)
         out = self.linear_layers(out)
         return out
+
+
+
+
+
+class PowerliftingCNN_Landmarks(nn.Module):
+    def __init__(self, num_classes):
+        super().__init__()
+        

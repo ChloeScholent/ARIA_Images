@@ -3,14 +3,6 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 import mediapipe as mp
 import cv2
-from model_class import PowerliftingCNN
-
-print('Loading the model...')
-model = PowerliftingCNN(num_classes=3)
-model.load_state_dict(torch.load("Models/Powerlifting_CNN_Classification.pth", map_location="cpu"))
-model.eval()
-print('Model loaded !')
-
 
 # -----------------------
 # 2. MediaPipe Pose setup
@@ -25,9 +17,11 @@ image = cv2.imread(image_path)
 rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 results = pose.process(rgb)
 
-mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-cv2.imshow("Pose", image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+
+
+# mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+# cv2.imshow("Pose", image)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
 
 
