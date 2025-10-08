@@ -35,9 +35,14 @@ class PowerliftingCNN(nn.Module):
 
 
 
-
-
-class PowerliftingCNN_Landmarks(nn.Module):
+class PowerliftingLandmarks(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
-        
+        self.landmarks_layers = nn.Sequential(
+            nn.Linear(), 
+            nn.ReLU(),
+        )
+
+    def forward(self, x):
+        out = self.landmarks_layers(x)
+        return out
