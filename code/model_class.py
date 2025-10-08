@@ -1,10 +1,7 @@
 import torch
 from torch import nn
 
-<<<<<<< HEAD
-=======
 
->>>>>>> 899693a (update)
 class PowerliftingCNN(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
@@ -34,16 +31,4 @@ class PowerliftingCNN(nn.Module):
     def forward(self, x):
         out = self.cnn_layers(x)
         out = self.linear_layers(out)
-<<<<<<< HEAD
         return out
-
-
-def accuracy_fn(outputs, labels):
-    preds = torch.argmax(outputs, dim=1)
-    acc = (torch.sum(preds == labels).item()/len(preds))*100
-    return acc
-
-    
-=======
-        return out
->>>>>>> 899693a (update)

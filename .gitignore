@@ -14,7 +14,7 @@ runs/
 
 # Ignorer les fichiers de configuration
 env/
-dataset/
+powerlifting/
 config/*.json
 
 # Ignorer les fichiers système

@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 
->>>>>>> 899693a (update)
 import torch
 from torch import nn
 import torchvision
@@ -11,13 +8,8 @@ from sklearn.metrics import confusion_matrix, classification_report
 import numpy as np
 from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
-<<<<<<< HEAD
-from dataset import powerlifting_dataset
-from model_class import PowerliftingCNN, accuracy_fn
-=======
 from correct_dataset import powerlifting_dataset
 from model_class import PowerliftingCNN
->>>>>>> 899693a (update)
 
 writer = SummaryWriter()
 
@@ -40,6 +32,7 @@ train_size = int(0.8 * len(dataset))
 test_size = len(dataset) - train_size
 train_data, test_data = random_split(dataset, [train_size, test_size])
 
+
 train_loader = DataLoader(train_data, batch_size, shuffle=True)
 test_loader = DataLoader(test_data, batch_size, shuffle=False)
 
@@ -47,6 +40,7 @@ test_loader = DataLoader(test_data, batch_size, shuffle=False)
 print(f'train_loader: {train_loader} \ntest_loader: {test_loader}')
 print('\n')
 print('Dataset loaded successfully !')
+
 
 #MODEL
 print('Creation of the model...')
@@ -62,6 +56,11 @@ print('\n')
 loss_fn = nn.CrossEntropyLoss()
 
 optimizer = torch.optim.Adam(params=Powerlifting_CNN.parameters(), lr=0.001)
+
+def accuracy_fn(outputs, labels):
+    preds = torch.argmax(outputs, dim=1)
+    acc = (torch.sum(preds == labels).item()/len(preds))*100
+    return acc
 
 epochs = 31
 
@@ -146,15 +145,7 @@ print("\nConfusion Matrix:\n", confusion_matrix(all_labels, all_preds))
 print("\nClassification Report:\n", classification_report(all_labels, all_preds))
 
 
-# #Saving the model
-# MODEL_PATH = Path("Models")
-# MODEL_PATH.mkdir(parents=True, exist_ok=True)
 
-<<<<<<< HEAD
-# MODEL_NAME = "Powerlifting_CNN_Classification.pth"
-# MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
-
-=======
 # #Saving the model
 # MODEL_PATH = Path("Models")
 # MODEL_PATH.mkdir(parents=True, exist_ok=True)
@@ -162,7 +153,6 @@ print("\nClassification Report:\n", classification_report(all_labels, all_preds)
 # MODEL_NAME = "Powerlifting_CNN_Classification.pth"
 # MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
 
->>>>>>> 899693a (update)
 # #save the model state dictionary
 # print(f'Saving model to {MODEL_SAVE_PATH}')
 # torch.save(obj=Powerlifting_CNN.state_dict(), f=MODEL_SAVE_PATH)
