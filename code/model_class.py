@@ -36,13 +36,21 @@ class PowerliftingCNN(nn.Module):
 
 
 class PowerliftingLandmarks(nn.Module):
-    def __init__(self, num_classes):
+    def __init__(self, input_size, num_classes):
         super().__init__()
-        self.landmarks_layers = nn.Sequential(
-            nn.Linear(), 
-            nn.ReLU(),
-        )
+
+        self.layers = nn.ModuleList()
+        self.layer_size = [input_size, 92, 50, 26, 12, num_classes]
+
+        self.layers.append(nn.Flatten())
+        for i in range(len(self.layer_size)-2):
+            self.layers.append(nn.Linear(self.layer_size[i], self.layer_size[i+1]))
+            self.layers.append(nn.ReLU())
+        
+        self.layers.append(nn.Linear(self.layer_size[-2], self.layer_size[-1]))        
 
     def forward(self, x):
-        out = self.landmarks_layers(x)
+        out = x
+        for layer in self.layers:
+            out = layer(out)
         return out

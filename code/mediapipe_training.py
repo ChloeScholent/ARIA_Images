@@ -8,9 +8,7 @@ import numpy as np
 from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
 from model_class import PowerliftingLandmarks
-from load_mediapipe import extract_pose_features
-
-
+from create_mediapipe_dataset import Landmark_Dataset
 
 
 writer = SummaryWriter()
@@ -24,11 +22,11 @@ print('Loading powerlifting dataset...')
 print('\n')
 
 
-input_size = 224*224
+input_size = 99
 num_classes = 3
 batch_size = 32
 
-dataset = powerlifting_dataset
+dataset = Landmark_Dataset("pose_dataset.csv")
 
 train_size = int(0.8 * len(dataset))
 test_size = len(dataset) - train_size
