@@ -39,6 +39,7 @@ class ExerciseDataset(Dataset):
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
+    transforms.RandomRotation(45)
 ])
 
 powerlifting_dataset = ExerciseDataset("dataset/", transform=transform)
