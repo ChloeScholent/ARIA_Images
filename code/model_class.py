@@ -6,7 +6,7 @@ class PowerliftingCNN(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
         self.cnn_layers = nn.Sequential(
-            nn.Conv2d(3, 32, 3, stride=2),  # downsample
+            nn.Conv2d(3, 32, 3, stride=2),
             nn.ReLU(),
             nn.MaxPool2d(2),
             nn.Conv2d(32, 64, 3, stride=2),
@@ -18,7 +18,7 @@ class PowerliftingCNN(nn.Module):
             nn.Conv2d(64, 128, 3, stride=2),
             nn.ReLU(),
         )
-        # compute output shape dynamically
+
         with torch.no_grad():
             dummy = torch.zeros(1, 3, 224, 224)
             n_features = self.cnn_layers(dummy).numel()
