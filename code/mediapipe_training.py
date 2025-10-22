@@ -11,7 +11,6 @@ from model_class import PowerliftingLandmarks
 from create_mediapipe_dataset import Landmark_Dataset
 import pandas as pd
 
-
 writer = SummaryWriter()
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -21,7 +20,6 @@ print('\n')
 
 print('Loading powerlifting dataset...')
 print('\n')
-
 
 input_size = 99
 num_classes = 3
@@ -33,6 +31,9 @@ print(dataset)
 
 print("Dataset loaded successfully !")
 print("\n")
+
+print(dataset)
+
 
 train_size = int(0.8 * len(dataset))
 test_size = len(dataset) - train_size
