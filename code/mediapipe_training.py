@@ -9,6 +9,7 @@ from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
 from model_class import PowerliftingLandmarks
 from create_mediapipe_dataset import Landmark_Dataset
+import pandas as pd
 
 
 writer = SummaryWriter()
@@ -26,7 +27,12 @@ input_size = 99
 num_classes = 3
 batch_size = 32
 
-dataset = Landmark_Dataset("pose_dataset.csv")
+dataset = Landmark_Dataset(csv_file="pose_dataset.csv")
+
+print(dataset)
+
+print("Dataset loaded successfully !")
+print("\n")
 
 train_size = int(0.8 * len(dataset))
 test_size = len(dataset) - train_size
@@ -45,9 +51,9 @@ print('Dataset loaded successfully !')
 #MODEL
 print('Creation of the model...')
 
-Powerlifting_CNN = PowerliftingCNN(num_classes).to(device)
+Powerlifting_Landmark = PowerliftingLandmarks(input_size, num_classes).to(device)
 
-print(Powerlifting_CNN)
+print(Powerlifting_Landmark)
 print('\nModel created successfully !')
 print('\n')
 
@@ -55,14 +61,14 @@ print('\n')
 
 loss_fn = nn.CrossEntropyLoss()
 
-optimizer = torch.optim.Adam(params=Powerlifting_CNN.parameters(), lr=0.001)
+optimizer = torch.optim.Adam(params=Powerlifting_Landmark.parameters(), lr=0.001)
 
 def accuracy_fn(outputs, labels):
     preds = torch.argmax(outputs, dim=1)
     acc = (torch.sum(preds == labels).item()/len(preds))*100
     return acc
 
-epochs = 31
+epochs = 10
 
 print('Training...')
 print('\n')
@@ -76,9 +82,9 @@ for epoch in range(epochs):
         train_input = train_input.to(device)
         train_labels = train_labels.to(device)
 
-        Powerlifting_CNN.train()
+        Powerlifting_Landmark.train()
 
-        outputs = Powerlifting_CNN(train_input)
+        outputs = Powerlifting_Landmark(train_input)
         loss = loss_fn(outputs, train_labels) 
         losses.append(loss.item())
         acc = accuracy_fn(outputs, train_labels)
@@ -92,13 +98,13 @@ for epoch in range(epochs):
     writer.add_scalar('Accuracy/Train', train_acc, epoch)
     writer.add_scalar('Loss/Train', losses, epoch)
 #EVALUATION
-    Powerlifting_CNN.eval()
+    Powerlifting_Landmark.eval()
     with torch.inference_mode():
         for test_inputs, test_labels in test_loader:
             test_inputs = test_inputs.to(device)
             test_labels = test_labels.to(device)
 
-            test_outputs = Powerlifting_CNN(test_inputs)
+            test_outputs = Powerlifting_Landmark(test_inputs)
             test_loss = loss_fn(test_outputs, test_labels)
             test_losses.append(test_loss.item())
             test_acc = accuracy_fn(test_outputs, test_labels)
@@ -107,7 +113,7 @@ for epoch in range(epochs):
         test_loss = sum(test_losses)/len(test_losses)
     writer.add_scalar('Loss/Test', test_loss, epoch)
     writer.add_scalar('Accuracy/Test', test_accs, epoch)
-    if epoch % 10 == 0:
+    if epoch % 2 == 0:
         print(f'Epoch: {epoch} | Loss: {losses:.5f}, Accuracy: {sum(accs)/len(accs):.2f}% | Test loss: {(sum(test_losses)/len(test_losses)):.5f}, Test acc: {test_accs:.2f}%')
 
 
@@ -120,7 +126,7 @@ writer.close()
 
 #Confusion matrix and classification report
 
-Powerlifting_CNN.eval()
+Powerlifting_Landmark.eval()
 
 all_preds = []
 all_labels = []
@@ -130,7 +136,7 @@ with torch.inference_mode():
         test_inputs = test_inputs.to(device)
         test_labels = test_labels.to(device)
 
-        test_outputs = Powerlifting_CNN(test_inputs)
+        test_outputs = Powerlifting_Landmark(test_inputs)
         preds = torch.argmax(test_outputs, dim=1)
 
         all_preds.append(preds.cpu().numpy())
@@ -150,9 +156,9 @@ print("\nClassification Report:\n", classification_report(all_labels, all_preds)
 # MODEL_PATH = Path("Models")
 # MODEL_PATH.mkdir(parents=True, exist_ok=True)
 
-# MODEL_NAME = "Powerlifting_CNN_Classification.pth"
+# MODEL_NAME = "Powerlifting_Landmark_Classification.pth"
 # MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
 
 # #save the model state dictionary
 # print(f'Saving model to {MODEL_SAVE_PATH}')
-# torch.save(obj=Powerlifting_CNN.state_dict(), f=MODEL_SAVE_PATH)
+# torch.save(obj=Powerlifting_Landmark.state_dict(), f=MODEL_SAVE_PATH)

@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import os 
 import pandas as pd 
+from torch.utils.data import Dataset
 
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(static_image_mode=True, min_detection_confidence=0.5)
@@ -41,7 +42,7 @@ def extract_pose_features(image_path):
     return landmarks.flatten()
 
 
-class Landmark_Dataset(self, csv_file):
+class Landmark_Dataset(Dataset):
     def __init__(self, csv_file):
         self.data = pd.read_csv(csv_file)
     
