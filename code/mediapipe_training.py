@@ -32,7 +32,6 @@ print(dataset)
 print("Dataset loaded successfully !")
 print("\n")
 
-print(dataset)
 
 
 train_size = int(0.8 * len(dataset))

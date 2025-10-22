@@ -64,7 +64,7 @@ class Landmark_Dataset(Dataset):
 
 
 
-image_dir = "powerlifting/train/images/"
+image_dir = "dataset/"
 data = []
 
 for filename in os.listdir(image_dir):
