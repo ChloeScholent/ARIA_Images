@@ -12,8 +12,8 @@ data_augmentation = transforms.Compose([
     transforms.ToTensor()
 ])
 
-folder_to_transform = "powerlifting/train/transformed_images/"
-output_folder = "powerlifting/train/images/"
+folder_to_transform = "data/dataset/"
+output_folder = "data/augmented_dataset/"
 
 for image in os.listdir(folder_to_transform):
     image_path = os.path.join(folder_to_transform, image)
