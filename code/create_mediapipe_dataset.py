@@ -62,9 +62,7 @@ class Landmark_Dataset(Dataset):
         y = torch.tensor(self.labels[idx])
         return x, y
 
-
-
-image_dir = "dataset/"
+image_dir = "data/dataset/"
 data = []
 
 for filename in os.listdir(image_dir):

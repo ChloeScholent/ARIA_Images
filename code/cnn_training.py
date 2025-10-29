@@ -50,108 +50,108 @@ print(Powerlifting_CNN)
 print('\nModel created successfully !')
 print('\n')
 
-#TRAINING
+# #TRAINING
 
-loss_fn = nn.CrossEntropyLoss()
+# loss_fn = nn.CrossEntropyLoss()
 
-optimizer = torch.optim.Adam(params=Powerlifting_CNN.parameters(), lr=0.001)
+# optimizer = torch.optim.Adam(params=Powerlifting_CNN.parameters(), lr=0.001)
 
-def accuracy_fn(outputs, labels):
-    preds = torch.argmax(outputs, dim=1)
-    acc = (torch.sum(preds == labels).item()/len(preds))*100
-    return acc
+# def accuracy_fn(outputs, labels):
+#     preds = torch.argmax(outputs, dim=1)
+#     acc = (torch.sum(preds == labels).item()/len(preds))*100
+#     return acc
 
-epochs = 31
+# epochs = 31
 
-print('Training...')
-print('\n')
+# print('Training...')
+# print('\n')
 
-for epoch in range(epochs):
-    losses = []
-    test_losses = []
-    accs = []
-    test_accs = []
-    for train_input, train_labels in train_loader:
-        train_input = train_input.to(device)
-        train_labels = train_labels.to(device)
+# for epoch in range(epochs):
+#     losses = []
+#     test_losses = []
+#     accs = []
+#     test_accs = []
+#     for train_input, train_labels in train_loader:
+#         train_input = train_input.to(device)
+#         train_labels = train_labels.to(device)
 
-        Powerlifting_CNN.train()
+#         Powerlifting_CNN.train()
 
-        outputs = Powerlifting_CNN(train_input)
-        loss = loss_fn(outputs, train_labels) 
-        losses.append(loss.item())
-        acc = accuracy_fn(outputs, train_labels)
-        accs.append(acc)
+#         outputs = Powerlifting_CNN(train_input)
+#         loss = loss_fn(outputs, train_labels) 
+#         losses.append(loss.item())
+#         acc = accuracy_fn(outputs, train_labels)
+#         accs.append(acc)
 
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-    losses = sum(losses)/len(losses)
-    train_acc = sum(accs)/len(accs)
-    writer.add_scalar('Accuracy/Train', train_acc, epoch)
-    writer.add_scalar('Loss/Train', losses, epoch)
-#EVALUATION
-    Powerlifting_CNN.eval()
-    with torch.inference_mode():
-        for test_inputs, test_labels in test_loader:
-            test_inputs = test_inputs.to(device)
-            test_labels = test_labels.to(device)
+#         optimizer.zero_grad()
+#         loss.backward()
+#         optimizer.step()
+#     losses = sum(losses)/len(losses)
+#     train_acc = sum(accs)/len(accs)
+#     writer.add_scalar('Accuracy/Train', train_acc, epoch)
+#     writer.add_scalar('Loss/Train', losses, epoch)
+# #EVALUATION
+#     Powerlifting_CNN.eval()
+#     with torch.inference_mode():
+#         for test_inputs, test_labels in test_loader:
+#             test_inputs = test_inputs.to(device)
+#             test_labels = test_labels.to(device)
 
-            test_outputs = Powerlifting_CNN(test_inputs)
-            test_loss = loss_fn(test_outputs, test_labels)
-            test_losses.append(test_loss.item())
-            test_acc = accuracy_fn(test_outputs, test_labels)
-            test_accs.append(test_acc)
-        test_accs = sum(test_accs)/len(test_accs)
-        test_loss = sum(test_losses)/len(test_losses)
-    writer.add_scalar('Loss/Test', test_loss, epoch)
-    writer.add_scalar('Accuracy/Test', test_accs, epoch)
-    if epoch % 10 == 0:
-        print(f'Epoch: {epoch} | Loss: {losses:.5f}, Accuracy: {sum(accs)/len(accs):.2f}% | Test loss: {(sum(test_losses)/len(test_losses)):.5f}, Test acc: {test_accs:.2f}%')
-
-
-
-print('\n')
-print('Training completed')
-
-writer.flush()
-writer.close()
-
-#Confusion matrix and classification report
-
-Powerlifting_CNN.eval()
-
-all_preds = []
-all_labels = []
-
-with torch.inference_mode():
-    for test_inputs, test_labels in test_loader:
-        test_inputs = test_inputs.to(device)
-        test_labels = test_labels.to(device)
-
-        test_outputs = Powerlifting_CNN(test_inputs)
-        preds = torch.argmax(test_outputs, dim=1)
-
-        all_preds.append(preds.cpu().numpy())
-        all_labels.append(test_labels.cpu().numpy())
-
-# Concatenate all predictions
-all_preds = np.concatenate(all_preds)
-all_labels = np.concatenate(all_labels)
-
-# Print confusion matrix & classification report
-print("\nConfusion Matrix:\n", confusion_matrix(all_labels, all_preds))
-print("\nClassification Report:\n", classification_report(all_labels, all_preds))
+#             test_outputs = Powerlifting_CNN(test_inputs)
+#             test_loss = loss_fn(test_outputs, test_labels)
+#             test_losses.append(test_loss.item())
+#             test_acc = accuracy_fn(test_outputs, test_labels)
+#             test_accs.append(test_acc)
+#         test_accs = sum(test_accs)/len(test_accs)
+#         test_loss = sum(test_losses)/len(test_losses)
+#     writer.add_scalar('Loss/Test', test_loss, epoch)
+#     writer.add_scalar('Accuracy/Test', test_accs, epoch)
+#     if epoch % 10 == 0:
+#         print(f'Epoch: {epoch} | Loss: {losses:.5f}, Accuracy: {sum(accs)/len(accs):.2f}% | Test loss: {(sum(test_losses)/len(test_losses)):.5f}, Test acc: {test_accs:.2f}%')
 
 
 
-# #Saving the model
-# MODEL_PATH = Path("Models")
-# MODEL_PATH.mkdir(parents=True, exist_ok=True)
+# print('\n')
+# print('Training completed')
 
-# MODEL_NAME = "Powerlifting_CNN_Classification.pth"
-# MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
+# writer.flush()
+# writer.close()
 
-# #save the model state dictionary
-# print(f'Saving model to {MODEL_SAVE_PATH}')
-# torch.save(obj=Powerlifting_CNN.state_dict(), f=MODEL_SAVE_PATH)
+# #Confusion matrix and classification report
+
+# Powerlifting_CNN.eval()
+
+# all_preds = []
+# all_labels = []
+
+# with torch.inference_mode():
+#     for test_inputs, test_labels in test_loader:
+#         test_inputs = test_inputs.to(device)
+#         test_labels = test_labels.to(device)
+
+#         test_outputs = Powerlifting_CNN(test_inputs)
+#         preds = torch.argmax(test_outputs, dim=1)
+
+#         all_preds.append(preds.cpu().numpy())
+#         all_labels.append(test_labels.cpu().numpy())
+
+# # Concatenate all predictions
+# all_preds = np.concatenate(all_preds)
+# all_labels = np.concatenate(all_labels)
+
+# # Print confusion matrix & classification report
+# print("\nConfusion Matrix:\n", confusion_matrix(all_labels, all_preds))
+# print("\nClassification Report:\n", classification_report(all_labels, all_preds))
+
+
+
+# # #Saving the model
+# # MODEL_PATH = Path("Models")
+# # MODEL_PATH.mkdir(parents=True, exist_ok=True)
+
+# # MODEL_NAME = "Powerlifting_CNN_Classification.pth"
+# # MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
+
+# # #save the model state dictionary
+# # print(f'Saving model to {MODEL_SAVE_PATH}')
+# # torch.save(obj=Powerlifting_CNN.state_dict(), f=MODEL_SAVE_PATH)

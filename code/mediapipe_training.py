@@ -25,7 +25,7 @@ input_size = 99
 num_classes = 3
 batch_size = 32
 
-dataset = Landmark_Dataset(csv_file="pose_dataset.csv")
+dataset = Landmark_Dataset(csv_file="data/pose_dataset.csv")
 
 print(dataset)
 

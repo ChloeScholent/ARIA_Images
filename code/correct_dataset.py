@@ -42,4 +42,4 @@ transform = transforms.Compose([
     transforms.RandomRotation(45)
 ])
 
-powerlifting_dataset = ExerciseDataset("dataset/", transform=transform)
+powerlifting_dataset = ExerciseDataset("data/dataset/", transform=transform)
