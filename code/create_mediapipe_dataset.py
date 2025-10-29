@@ -42,26 +42,6 @@ def extract_pose_features(image_path):
     return landmarks.flatten()
 
 
-class Landmark_Dataset(Dataset):
-    def __init__(self, csv_file):
-        self.data = pd.read_csv(csv_file)
-    
-        # Map class names to numeric labels
-        self.class_map = {"bench": 0, "squat": 1, "deadlift": 2}
-        self.data["label"] = self.data["class"].map(self.class_map)
-        
-        # Drop the text class column
-        self.features = self.data.drop(["class", "label"], axis=1).values.astype("float32")
-        self.labels = self.data["label"].values.astype("int64")
-
-    def __len__(self):
-        return len(self.labels)
-
-    def __getitem__(self, idx):
-        x = torch.tensor(self.features[idx])
-        y = torch.tensor(self.labels[idx])
-        return x, y
-
 image_dir = "data/dataset/"
 data = []
 
@@ -88,7 +68,7 @@ for i in range(33):
     columns += [f"x{i}", f"y{i}", f"z{i}"]
 
 df = pd.DataFrame(data, columns=columns)
-df.to_csv("pose_dataset.csv", index=False)
+df.to_csv("data/pose_dataset.csv", index=False)
 print("✅ Saved pose_dataset.csv with", len(df), "samples")
 
 

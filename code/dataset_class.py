@@ -1,7 +1,9 @@
 import os
+import torch
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 from torchvision import transforms
+import pandas as pd
 
 class ExerciseDataset(Dataset):
     def __init__(self, image_dir, transform=None):
@@ -36,10 +38,30 @@ class ExerciseDataset(Dataset):
 
         return image, label
 
-transform = transforms.Compose([
+
+class Landmark_Dataset(Dataset):
+    def __init__(self, csv_file):
+        self.data = pd.read_csv(csv_file)
+    
+        # Map class names to numeric labels
+        self.class_map = {"bench": 0, "squat": 1, "deadlift": 2}
+        self.data["label"] = self.data["class"].map(self.class_map)
+        
+        # Drop the text class column
+        self.features = self.data.drop(["class", "label"], axis=1).values.astype("float32")
+        self.labels = self.data["label"].values.astype("int64")
+
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, idx):
+        x = torch.tensor(self.features[idx])
+        y = torch.tensor(self.labels[idx])
+        return x, y
+
+exercise_transform = transforms.Compose([
     transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.RandomRotation(45)
+    transforms.ToTensor()
 ])
 
-powerlifting_dataset = ExerciseDataset("data/dataset/", transform=transform)
+

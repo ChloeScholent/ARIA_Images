@@ -8,7 +8,7 @@ import numpy as np
 from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
 from model_class import PowerliftingLandmarks
-from create_mediapipe_dataset import Landmark_Dataset
+from dataset_class import Landmark_Dataset
 import pandas as pd
 
 writer = SummaryWriter()
