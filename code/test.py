@@ -34,7 +34,7 @@ class PowerliftingCNN(nn.Module):
         out = self.linear_layers(out)
         return out
 
-test = PowerliftingCNN(num_classes = 3)
+test = PowerliftingCNN(num_classes = 3).to("cuda")
 
 print(test)
 
