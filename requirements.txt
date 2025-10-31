@@ -4,7 +4,11 @@ pandas
 torch
 torchvision
 scikit-learn
+scikit-image
 tensorboard
 tqdm
 opencv-python
 mediapipe
+squeezenet
+pickle
+pypickle
