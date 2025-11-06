@@ -42,7 +42,7 @@ def extract_pose_features(image_path):
     return landmarks.flatten()
 
 
-image_dir = "data/dataset/"
+image_dir = "data/augmented_dataset"
 data = []
 
 for filename in os.listdir(image_dir):
@@ -68,7 +68,7 @@ for i in range(33):
     columns += [f"x{i}", f"y{i}", f"z{i}"]
 
 df = pd.DataFrame(data, columns=columns)
-df.to_csv("data/pose_dataset.csv", index=False)
+df.to_csv("data/pose_dataset_augmented.csv", index=False)
 print("✅ Saved pose_dataset.csv with", len(df), "samples")
 
 

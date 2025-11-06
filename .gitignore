@@ -11,6 +11,7 @@ __pycache__/
 code/__pycache__/
 *.pyc
 runs/
+visual/
 
 # Ignorer les fichiers de configuration
 env/

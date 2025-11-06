@@ -5,10 +5,12 @@ from torch.utils.data import DataLoader, random_split
 from tqdm.auto import tqdm
 from sklearn.metrics import confusion_matrix, classification_report
 import numpy as np
+import os
 from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
 from dataset_class import ExerciseDataset, exercise_transform
 from model_class import PowerliftingCNN
+import matplotlib.pyplot as plt
 
 writer = SummaryWriter()
 
@@ -24,7 +26,7 @@ input_size = 224*224
 num_classes = 3
 batch_size = 32
 
-dataset = ExerciseDataset("data/dataset/", transform=exercise_transform)
+dataset = ExerciseDataset("data/augmented_dataset/", transform=exercise_transform)
 
 train_size = int(0.8 * len(dataset))
 test_size = len(dataset) - train_size
@@ -143,14 +145,42 @@ print("\nConfusion Matrix:\n", confusion_matrix(all_labels, all_preds))
 print("\nClassification Report:\n", classification_report(all_labels, all_preds))
 
 
+# cm = confusion_matrix(all_labels, all_preds)
 
-# #Saving the model
-# MODEL_PATH = Path("Models")
-# MODEL_PATH.mkdir(parents=True, exist_ok=True)
+# # Plot confusion matrix heatmap with matplotlib
+# plt.figure(figsize=(8, 6))
+# plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+# plt.title("Confusion Matrix Heatmap")
+# plt.colorbar()
 
-# MODEL_NAME = "Powerlifting_CNN_Classification.pth"
-# MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
+# # Add labels, ticks, and numbers
+# num_classes = cm.shape[0]
+# tick_marks = np.arange(num_classes)
+# plt.xticks(tick_marks, tick_marks)
+# plt.yticks(tick_marks, tick_marks)
 
-# #save the model state dictionary
-# print(f'Saving model to {MODEL_SAVE_PATH}')
-# torch.save(obj=Powerlifting_CNN.state_dict(), f=MODEL_SAVE_PATH)
+# # Add text annotations
+# for i in range(num_classes):
+#     for j in range(num_classes):
+#         plt.text(j, i, str(cm[i, j]),
+#                  ha='center', va='center',
+#                  color='white' if cm[i, j] > cm.max() / 2 else 'black')
+
+# plt.ylabel("True Label")
+# plt.xlabel("Predicted Label")
+# plt.tight_layout()
+
+# # Save the heatmap
+# plt.savefig(f"visual/confusion_matrix_heatmap_augmented.pdf", format="pdf", dpi=300)
+# plt.close()
+
+#Saving the model
+MODEL_PATH = Path("Models")
+MODEL_PATH.mkdir(parents=True, exist_ok=True)
+
+MODEL_NAME = "Powerlifting_CNN_Classification_Augmented.pth"
+MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
+
+#save the model state dictionary
+print(f'Saving model to {MODEL_SAVE_PATH}')
+torch.save(obj=Powerlifting_CNN.state_dict(), f=MODEL_SAVE_PATH)

@@ -10,6 +10,7 @@ from torch.utils.tensorboard import SummaryWriter
 from model_class import PowerliftingLandmarks
 from dataset_class import Landmark_Dataset
 import pandas as pd
+import matplotlib.pyplot as plt
 
 writer = SummaryWriter()
 
@@ -150,6 +151,34 @@ all_labels = np.concatenate(all_labels)
 print("\nConfusion Matrix:\n", confusion_matrix(all_labels, all_preds))
 print("\nClassification Report:\n", classification_report(all_labels, all_preds))
 
+# cm = confusion_matrix(all_labels, all_preds)
+
+# # Plot confusion matrix heatmap with matplotlib
+# plt.figure(figsize=(8, 6))
+# plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+# plt.title("Confusion Matrix Heatmap")
+# plt.colorbar()
+
+# # Add labels, ticks, and numbers
+# num_classes = cm.shape[0]
+# tick_marks = np.arange(num_classes)
+# plt.xticks(tick_marks, tick_marks)
+# plt.yticks(tick_marks, tick_marks)
+
+# # Add text annotations
+# for i in range(num_classes):
+#     for j in range(num_classes):
+#         plt.text(j, i, str(cm[i, j]),
+#                  ha='center', va='center',
+#                  color='white' if cm[i, j] > cm.max() / 2 else 'black')
+
+# plt.ylabel("True Label")
+# plt.xlabel("Predicted Label")
+# plt.tight_layout()
+
+# # Save the heatmap
+# plt.savefig("visual/confusion_matrix_heatmap_mediapipe_augmented.pdf", format="pdf", dpi=300)
+# plt.close()
 
 
 # #Saving the model
