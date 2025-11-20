@@ -110,6 +110,13 @@ for epoch in range(epochs):
     if epoch % 10 == 0:
         print(f'Epoch: {epoch} | Loss: {losses:.5f}, Accuracy: {sum(accs)/len(accs):.2f}% | Test loss: {(sum(test_losses)/len(test_losses)):.5f}, Test acc: {test_accs:.2f}%')
 
+# Plot the loss curve
+plt.plot(test_losses)
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.title('Testing Loss')
+plt.legend()
+plt.savefig("test_losses.pdf", format="pdf", dpi = 300)
 
 
 print('\n')
