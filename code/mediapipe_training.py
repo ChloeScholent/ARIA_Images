@@ -1,26 +1,18 @@
 import torch
 from torch import nn
-import torchvision
 from torch.utils.data import DataLoader, random_split
-from tqdm.auto import tqdm
 from sklearn.metrics import confusion_matrix, classification_report
 import numpy as np
 from pathlib import Path
-from torch.utils.tensorboard import SummaryWriter
-from model_class import PowerliftingLandmarks
-from dataset_class import Landmark_Dataset
-import pandas as pd
 import matplotlib.pyplot as plt
 
-writer = SummaryWriter()
+from model_class import PowerliftingLandmarks, accuracy_fn
+from dataset_class import Landmark_Dataset
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-print('Device:', device)
-print('\n')
-#DATASET
+print("Device:", device, "\n")
 
-print('Loading powerlifting dataset...')
-print('\n')
+print("Loading powerlifting landmark dataset...\n")
 
 input_size = 99
 num_classes = 3
@@ -29,103 +21,82 @@ batch_size = 32
 dataset = Landmark_Dataset(csv_file="data/pose_dataset.csv")
 
 print(dataset)
-
-print("Dataset loaded successfully !")
-print("\n")
-
-
+print("\nDataset loaded successfully!\n")
 
 train_size = int(0.8 * len(dataset))
 test_size = len(dataset) - train_size
 train_data, test_data = random_split(dataset, [train_size, test_size])
 
+train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
+test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
 
-train_loader = DataLoader(train_data, batch_size, shuffle=True)
-test_loader = DataLoader(test_data, batch_size, shuffle=False)
-
-
-print(f'train_loader: {train_loader} \ntest_loader: {test_loader}')
-print('\n')
-print('Dataset loaded successfully !')
+print("train_loader:", train_loader)
+print("test_loader:", test_loader, "\n")
 
 
-#MODEL
-print('Creation of the model...')
+print("Creating model...\n")
 
 Powerlifting_Landmark = PowerliftingLandmarks(input_size, num_classes).to(device)
-
 print(Powerlifting_Landmark)
-print('\nModel created successfully !')
-print('\n')
+print("\nModel created successfully!\n")
 
-#TRAINING
 
 loss_fn = nn.CrossEntropyLoss()
-
-optimizer = torch.optim.Adam(params=Powerlifting_Landmark.parameters(), lr=0.001)
-
-def accuracy_fn(outputs, labels):
-    preds = torch.argmax(outputs, dim=1)
-    acc = (torch.sum(preds == labels).item()/len(preds))*100
-    return acc
-
+optimizer = torch.optim.Adam(Powerlifting_Landmark.parameters(), lr=0.001)
 epochs = 10
 
-print('Training...')
-print('\n')
+train_loss_history = []
+test_loss_history = []
+train_acc_history = []
+test_acc_history = []
+
+print("Training...\n")
 
 for epoch in range(epochs):
-    losses = []
-    test_losses = []
-    accs = []
-    test_accs = []
-    for train_input, train_labels in train_loader:
-        train_input = train_input.to(device)
-        train_labels = train_labels.to(device)
+    Powerlifting_Landmark.train()
+    batch_losses, batch_accs = [], []
 
-        Powerlifting_Landmark.train()
+    for train_input, train_labels in train_loader:
+        train_input, train_labels = train_input.to(device), train_labels.to(device)
 
         outputs = Powerlifting_Landmark(train_input)
-        loss = loss_fn(outputs, train_labels) 
-        losses.append(loss.item())
-        acc = accuracy_fn(outputs, train_labels)
-        accs.append(acc)
+        loss = loss_fn(outputs, train_labels)
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-    losses = sum(losses)/len(losses)
-    train_acc = sum(accs)/len(accs)
-    writer.add_scalar('Accuracy/Train', train_acc, epoch)
-    writer.add_scalar('Loss/Train', losses, epoch)
-#EVALUATION
+
+        batch_losses.append(loss.item())
+        batch_accs.append(accuracy_fn(outputs, train_labels))
+
+    # Evaluation
     Powerlifting_Landmark.eval()
+    test_losses, test_accs = [], []
+
     with torch.inference_mode():
         for test_inputs, test_labels in test_loader:
-            test_inputs = test_inputs.to(device)
-            test_labels = test_labels.to(device)
+            test_inputs, test_labels = test_inputs.to(device), test_labels.to(device)
 
             test_outputs = Powerlifting_Landmark(test_inputs)
             test_loss = loss_fn(test_outputs, test_labels)
+
             test_losses.append(test_loss.item())
-            test_acc = accuracy_fn(test_outputs, test_labels)
-            test_accs.append(test_acc)
-        test_accs = sum(test_accs)/len(test_accs)
-        test_loss = sum(test_losses)/len(test_losses)
-    writer.add_scalar('Loss/Test', test_loss, epoch)
-    writer.add_scalar('Accuracy/Test', test_accs, epoch)
-    if epoch % 2 == 0:
-        print(f'Epoch: {epoch} | Loss: {losses:.5f}, Accuracy: {sum(accs)/len(accs):.2f}% | Test loss: {(sum(test_losses)/len(test_losses)):.5f}, Test acc: {test_accs:.2f}%')
+            test_accs.append(accuracy_fn(test_outputs, test_labels))
 
+    # Save metrics
+    train_loss_history.append(np.mean(batch_losses))
+    test_loss_history.append(np.mean(test_losses))
+    train_acc_history.append(np.mean(batch_accs))
+    test_acc_history.append(np.mean(test_accs))
 
+    print(
+        f"Epoch {epoch+1}/{epochs} | "
+        f"Train Loss: {train_loss_history[-1]:.4f} | Test Loss: {test_loss_history[-1]:.4f} | "
+        f"Train Acc: {train_acc_history[-1]:.4f} | Test Acc: {test_acc_history[-1]:.4f}"
+    )
 
-print('\n')
-print('Training completed')
+print("\nTraining completed!\n")
 
-writer.flush()
-writer.close()
-
-#Confusion matrix and classification report
 
 Powerlifting_Landmark.eval()
 
@@ -135,59 +106,45 @@ all_labels = []
 with torch.inference_mode():
     for test_inputs, test_labels in test_loader:
         test_inputs = test_inputs.to(device)
-        test_labels = test_labels.to(device)
 
-        test_outputs = Powerlifting_Landmark(test_inputs)
-        preds = torch.argmax(test_outputs, dim=1)
+        outputs = Powerlifting_Landmark(test_inputs)
+        preds = torch.argmax(outputs, dim=1)
 
         all_preds.append(preds.cpu().numpy())
-        all_labels.append(test_labels.cpu().numpy())
+        all_labels.append(test_labels.numpy())
 
-# Concatenate all predictions
 all_preds = np.concatenate(all_preds)
 all_labels = np.concatenate(all_labels)
 
-# Print confusion matrix & classification report
 print("\nConfusion Matrix:\n", confusion_matrix(all_labels, all_preds))
 print("\nClassification Report:\n", classification_report(all_labels, all_preds))
 
-# cm = confusion_matrix(all_labels, all_preds)
 
-# # Plot confusion matrix heatmap with matplotlib
-# plt.figure(figsize=(8, 6))
-# plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-# plt.title("Confusion Matrix Heatmap")
-# plt.colorbar()
+Path("plots").mkdir(exist_ok=True)
 
-# # Add labels, ticks, and numbers
-# num_classes = cm.shape[0]
-# tick_marks = np.arange(num_classes)
-# plt.xticks(tick_marks, tick_marks)
-# plt.yticks(tick_marks, tick_marks)
+# Accuracy curve
+plt.figure()
+plt.plot(train_acc_history, label="Train Accuracy")
+plt.plot(test_acc_history, label="Test Accuracy")
+plt.xlabel("Epoch")
+plt.ylabel("Accuracy")
+plt.title("Landmark Model Accuracy Curve")
+plt.legend()
+plt.savefig("plots/landmarks_accuracy.pdf", dpi=300)
 
-# # Add text annotations
-# for i in range(num_classes):
-#     for j in range(num_classes):
-#         plt.text(j, i, str(cm[i, j]),
-#                  ha='center', va='center',
-#                  color='white' if cm[i, j] > cm.max() / 2 else 'black')
-
-# plt.ylabel("True Label")
-# plt.xlabel("Predicted Label")
-# plt.tight_layout()
-
-# # Save the heatmap
-# plt.savefig("visual/confusion_matrix_heatmap_mediapipe_augmented.pdf", format="pdf", dpi=300)
-# plt.close()
+# Loss curve
+plt.figure()
+plt.plot(train_loss_history, label="Train Loss")
+plt.plot(test_loss_history, label="Test Loss")
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.title("Landmark Model Loss Curve")
+plt.legend()
+plt.savefig("plots/landmarks_loss.pdf", dpi=300)
 
 
-# #Saving the model
 # MODEL_PATH = Path("Models")
 # MODEL_PATH.mkdir(parents=True, exist_ok=True)
-
-# MODEL_NAME = "Powerlifting_Landmark_Classification.pth"
-# MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
-
-# #save the model state dictionary
-# print(f'Saving model to {MODEL_SAVE_PATH}')
-# torch.save(obj=Powerlifting_Landmark.state_dict(), f=MODEL_SAVE_PATH)
+# SAVE_PATH = MODEL_PATH / "Powerlifting_Landmark_Classification.pth"
+# torch.save(Powerlifting_Landmark.state_dict(), SAVE_PATH)
+# print(f"\nModel saved to {SAVE_PATH}")
