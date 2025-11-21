@@ -14,15 +14,14 @@ from model_class import PowerliftingCNN, accuracy_fn
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print("Device:", device)
 
-# -----------------------
-# DATASET LOADING
-# -----------------------
+
+
 print("\nLoading powerlifting dataset...\n")
 
 num_classes = 3
 batch_size = 32
 
-dataset = ExerciseDataset("data/augmented_dataset/", transform=exercise_transform)
+dataset = ExerciseDataset("data/dataset/", transform=exercise_transform)
 
 train_size = int(0.8 * len(dataset))
 test_size = len(dataset) - train_size
@@ -33,17 +32,15 @@ test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
 
 print("Dataset loaded successfully!\n")
 
-# -----------------------
-# MODEL CREATION
-# -----------------------
+
+
 print("Creating model...\n")
 Powerlifting_CNN = PowerliftingCNN(num_classes).to(device)
 print(Powerlifting_CNN)
 print("\nModel created successfully!\n")
 
-# -----------------------
-# TRAINING SETUP
-# -----------------------
+
+
 loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(Powerlifting_CNN.parameters(), lr=0.001)
 epochs = 31
@@ -55,9 +52,8 @@ test_acc_history = []
 
 print("Training...\n")
 
-# -----------------------
-# TRAINING LOOP
-# -----------------------
+
+
 for epoch in range(epochs):
     Powerlifting_CNN.train()
     losses, accs = [], []
@@ -101,15 +97,109 @@ for epoch in range(epochs):
 
 print("\nTraining completed.\n")
 
-# -----------------------
-# PLOTTING
-# -----------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+dataset_2 = ExerciseDataset("data/augmented_dataset/", transform=exercise_transform)
+
+train_size = int(0.8 * len(dataset_2))
+test_size = len(dataset_2) - train_size
+train_data, test_data = random_split(dataset_2, [train_size, test_size])
+
+train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
+test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
+
+print("Dataset loaded successfully!\n")
+
+
+
+print("Creating model...\n")
+Powerlifting_CNN_2 = PowerliftingCNN(num_classes).to(device)
+print(Powerlifting_CNN_2)
+print("\nModel created successfully!\n")
+
+
+
+loss_fn = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(Powerlifting_CNN_2.parameters(), lr=0.001)
+epochs = 31
+
+train_loss_history_2 = []
+test_loss_history_2 = []
+train_acc_history_2 = []
+test_acc_history_2 = []
+
+print("Training...\n")
+
+
+
+for epoch in range(epochs):
+    Powerlifting_CNN_2.train()
+    losses, accs = [], []
+
+    for train_input, train_labels in train_loader:
+        train_input, train_labels = train_input.to(device), train_labels.to(device)
+
+        outputs = Powerlifting_CNN_2(train_input)
+        loss = loss_fn(outputs, train_labels)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        losses.append(loss.item())
+        accs.append(accuracy_fn(outputs, train_labels))
+
+    # Evaluation
+    Powerlifting_CNN_2.eval()
+    test_losses, test_accs = [], []
+
+    with torch.inference_mode():
+        for test_inputs, test_labels in test_loader:
+            test_inputs, test_labels = test_inputs.to(device), test_labels.to(device)
+
+            test_outputs = Powerlifting_CNN_2(test_inputs)
+            test_loss = loss_fn(test_outputs, test_labels)
+
+            test_losses.append(test_loss.item())
+            test_accs.append(accuracy_fn(test_outputs, test_labels))
+
+    # Save metrics per epoch
+    train_loss_history_2.append(np.mean(losses))
+    test_loss_history_2.append(np.mean(test_losses))
+    train_acc_history_2.append(np.mean(accs))
+    test_acc_history_2.append(np.mean(test_accs))
+
+    print(f"Epoch {epoch+1}/{epochs} | "
+          f"Train Loss: {train_loss_history_2[-1]:.4f} | Test Loss: {test_loss_history_2[-1]:.4f} | "
+          f"Train Acc: {train_acc_history_2[-1]:.4f} | Test Acc: {test_acc_history_2[-1]:.4f}")
+
+print("\nTraining completed.\n")
+
+
 Path("plots").mkdir(exist_ok=True)
 
 # Accuracy curve
 plt.figure()
 plt.plot(train_acc_history, label="Train Accuracy")
 plt.plot(test_acc_history, label="Test Accuracy")
+plt.plot(train_acc_history_2, label="Train Accuracy (augmented)")
+plt.plot(test_acc_history_2, label="Test Accuracy (augmented)")
 plt.xlabel("Epoch")
 plt.ylabel("Accuracy")
 plt.title("Accuracy Curve")
@@ -120,38 +210,40 @@ plt.savefig("plots/accuracy_curve.pdf", dpi=300)
 plt.figure()
 plt.plot(train_loss_history, label="Train Loss")
 plt.plot(test_loss_history, label="Test Loss")
+plt.plot(train_loss_history_2, label="Train Loss (augmented)")
+plt.plot(test_loss_history_2, label="Test Loss (augmented)")
 plt.xlabel("Epoch")
 plt.ylabel("Loss")
 plt.title("Loss Curve")
 plt.legend()
 plt.savefig("plots/loss_curve.pdf", dpi=300)
 
-# -----------------------
-# CONFUSION MATRIX
-# -----------------------
-Powerlifting_CNN.eval()
-all_preds, all_labels = [], []
 
-with torch.inference_mode():
-    for test_inputs, test_labels in test_loader:
-        test_inputs = test_inputs.to(device)
-        test_outputs = Powerlifting_CNN(test_inputs)
-        preds = torch.argmax(test_outputs, dim=1)
+#Confusion Matrix
 
-        all_preds.append(preds.cpu().numpy())
-        all_labels.append(test_labels.numpy())
+# Powerlifting_CNN.eval()
+# all_preds, all_labels = [], []
 
-all_preds = np.concatenate(all_preds)
-all_labels = np.concatenate(all_labels)
+# with torch.inference_mode():
+#     for test_inputs, test_labels in test_loader:
+#         test_inputs = test_inputs.to(device)
+#         test_outputs = Powerlifting_CNN(test_inputs)
+#         preds = torch.argmax(test_outputs, dim=1)
 
-print("\nConfusion Matrix:\n", confusion_matrix(all_labels, all_preds))
-print("\nClassification Report:\n", classification_report(all_labels, all_preds))
+#         all_preds.append(preds.cpu().numpy())
+#         all_labels.append(test_labels.numpy())
 
-# -----------------------
-# SAVE MODEL
-# -----------------------
+# all_preds = np.concatenate(all_preds)
+# all_labels = np.concatenate(all_labels)
+
+# print("\nConfusion Matrix:\n", confusion_matrix(all_labels, all_preds))
+# print("\nClassification Report:\n", classification_report(all_labels, all_preds))
+
+
+
+
 # model_path = Path("Models")
 # model_path.mkdir(exist_ok=True)
-# save_path = model_path / "Powerlifting_CNN_Classification_Augmented.pth"
+# save_path = model_path / "Powerlifting_CNN_Classification.pth"
 # torch.save(Powerlifting_CNN.state_dict(), save_path)
 # print(f"\nModel saved to: {save_path}")
